@@ -7,22 +7,10 @@ import 'react-toastify/dist/ReactToastify.css';
 import Button from '~/components/button';
 import Input from '~/components/input';
 import { PencilSquareIcon } from '@heroicons/react/24/solid'
+import { Tool } from '~/components/types/Tool';
+import { InputEnum } from '~/components/types/InputEnum';
 
-export type Tool = {
-  id: string;
-  title: string;
-  description: string;
-  url: string;
-};
-
-export enum InputEnum {
-  Id = 'id',
-  Title = 'title',
-  Description = 'description',
-  Url = 'url',
-}
-
-function Index() {
+function Interface() {
   const [tools, setTools] = useState<Tool[]>([]);
   const [inputData, setInputData] = useState<Partial<Tool>>({
     title: '',
@@ -145,4 +133,4 @@ function Index() {
   );
 }
 
-export default Index;
+export default Interface;
