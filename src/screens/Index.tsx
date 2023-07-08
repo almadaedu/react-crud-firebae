@@ -1,6 +1,6 @@
 import { useFirestore } from '~/lib/firebase';
 import { Head } from '~/components/shared/Head';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { collection, query, getDocs, addDoc } from 'firebase/firestore';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -22,32 +22,40 @@ export enum InputEnum {
 }
 
 function Index() {
-  const [tools, setTools] = useState<Array<Tool>>([]);
-  const firestore = useFirestore();
+  const [tools, setTools] = useState<Tool[]>([]);
   const [inputData, setInputData] = useState<Partial<Tool>>({
     title: '',
     description: '',
     url: '',
   });
   const [formError, setFormError] = useState<boolean>(false);
+  const firestore = useFirestore();
 
   useEffect(() => {
-    async function fetchData() {
-      const toolsColection = collection(firestore, 'tools');
-      const toolsQuery = query(toolsColection);
-      const querySnapshot = await getDocs(toolsQuery);
-      const fetchedData: Array<Tool> = [];
-      querySnapshot.forEach((doc) => {
-        fetchedData.push({ id: doc.id, ...doc.data() } as Tool);
-      });
-      setTools(fetchedData);
-      console.log(fetchedData);
-    }
+    const fetchData = async () => {
+      try {
+        const toolsCollection = collection(firestore, 'tools');
+        const toolsQuery = query(toolsCollection);
+        const querySnapshot = await getDocs(toolsQuery);
+        const fetchedData: Tool[] = [];
+        querySnapshot.forEach((doc) => {
+          fetchedData.push({ id: doc.id, ...doc.data() } as Tool);
+        });
+        setTools(fetchedData);
+        console.log(fetchedData);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
     fetchData();
   }, []);
 
   const handleInputChange = (field: InputEnum, value: string) => {
-    setInputData({ ...inputData, [field]: value });
+    setInputData((prevInputData) => ({
+      ...prevInputData,
+      [field]: value,
+    }));
   };
 
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -64,7 +72,7 @@ function Index() {
 
       await addDoc(toolsCollection, newTool);
 
-      setTools([...tools, newTool]);
+      setTools([...tools, newTool]);      
       setInputData({
         title: '',
         description: '',
@@ -98,17 +106,17 @@ function Index() {
         <div className="max-w-5xl mx-auto ">
           <form className="flex" onSubmit={handleFormSubmit}>
             <Input
-              placeholder="title"
+              placeholder="Title"
               value={inputData.title}
               onChange={(e) => handleInputChange(InputEnum.Title, e.target.value)}
             />
             <Input
-              placeholder="description"
+              placeholder="Description"
               value={inputData.description}
               onChange={(e) => handleInputChange(InputEnum.Description, e.target.value)}
             />
             <Input
-              placeholder="url"
+              placeholder="URL"
               value={inputData.url}
               onChange={(e) => handleInputChange(InputEnum.Url, e.target.value)}
             />
